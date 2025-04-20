@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MoodSpace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        :root {
+            --bg: #f5f7fa;
+            --text: #333;
+        }
+
+        .dark {
+            --bg: #1e1e2f;
+            --text: #f0f0f0;
+        }
+
+        header {
+            background: #6c63ff;
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 2rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        button,
+        select {
+            background: #6c63ff;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mood-checkin {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .emoji {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .emoji:hover {
+            transform: scale(1.2);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: none;
+            font-size: 1rem;
+        }
+
+        ul.history {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul.history li {
+            background: #e8e8ff;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: #eee;
+            margin-top: 2rem;
+        }
+
+        .tip {
+            font-size: 0.9rem;
+            color: #777;
+            margin-top: 0.5rem;
+        }
+
+        .label-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .lang-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1 id="title">MoodSpace</h1>
+        <p id="subtitle">Your safe space to track, express and connect.</p>
+    </header>
+    <div class="controls">
+        <button style="font-size: 0.75rem; padding: 0.3rem 0.6rem;" onclick="toggleTheme()">Toggle Theme</button>
+        <div class="lang-controls">
+            <label class="label-text">Interface Language:</label>
+            <select onchange="setLanguage(this.value)">
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+            </select>
+            <label class="label-text">Journal Language:</label>
+            <select id="inputLang" onchange="updatePrompt()">
+                <option value="en">📝 English</option>
+                <option value="hi">📝 हिन्दी</option>
+            </select>
+        </div>
+    </div>
+    <main>
+        <section class="section">
+            <h2 id="howFeel">How are you feeling today?</h2>
+            <div class="mood-checkin">
+                <span class="emoji" onclick="setMood('😊')">😊</span>
+                <span class="emoji" onclick="setMood('😢')">😢</span>
+                <span class="emoji" onclick="setMood('😡')">😡</span>
+                <span class="emoji" onclick="setMood('😐')">😐</span>
+                <span class="emoji" onclick="setMood('😴')">😴</span>
+            </div>
+            <textarea id="journal" rows="4" placeholder="Write about your mood..."></textarea>
+            <div class="tip">Tip: Use Google Hindi Input to type in Hindi easily.</div>
+            <button onclick="submitMood()" id="submitBtn">Submit</button>
+        </section>
+        <section class="section">
+            <h2 id="historyTitle">Your Mood History</h2>
+            <ul class="history" id="history"></ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; Made by: Mayank</p>
+    </footer>
+
+    <script>
+        const translations = {
+            en: {
+                title: "MoodSpace",
+                subtitle: "Your safe space to track, express and connect.",
+                howFeel: "How are you feeling today?",
+                submitBtn: "Submit",
+                historyTitle: "Your Mood History"
+            },
+            hi: {
+                title: "मूडस्पेस",
+                subtitle: "अपनी भावनाओं को व्यक्त करने और ट्रैक करने का सुरक्षित स्थान।",
+                howFeel: "आज आप कैसा महसूस कर रहे हैं?",
+                submitBtn: "सबमिट करें",
+                historyTitle: "आपका मूड इतिहास"
+            }
+        };
+
+        function setLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('title').innerText = t.title;
+            document.getElementById('subtitle').innerText = t.subtitle;
+            document.getElementById('howFeel').innerText = t.howFeel;
+            document.getElementById('submitBtn').innerText = t.submitBtn;
+            document.getElementById('historyTitle').innerText = t.historyTitle;
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+        }
+
+        function updatePrompt() {
+            const lang = document.getElementById('inputLang').value;
+            const mood = selectedMood || '';
+            const prompts = {
+                en: `Today I feel ${mood} because...`,
+                hi: `आज मैं ${mood} महसूस कर रहा/रही हूँ क्योंकि...`
+            };
+            document.getElementById('journal').placeholder = prompts[lang];
+        }
+
+        let selectedMood = '';
+        function setMood(mood) {
+            selectedMood = mood;
+            updatePrompt();
+        }
+
+        function submitMood() {
+            const text = document.getElementById('journal').value.trim();
+            if (text === '') {
+                alert('Please write something about your mood.');
+                return;
+            }
+            const now = new Date().toLocaleString();
+            const entry = `${now}: ${text}`;
+            const history = JSON.parse(localStorage.getItem('moodHistory') || '[]');
+            history.unshift(entry);
+            localStorage.setItem('moodHistory', JSON.stringify(history));
+            renderHistory();
+            document.getElementById('journal').value = '';
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('moodHistory') || '[]');
+            const list = document.getElementById('history');
+            list.innerHTML = '';
+            history.forEach(entry => {
+                const li = document.createElement('li');
+                li.textContent = entry;
+                list.appendChild(li);
+            });
+        }
+
+        window.onload = () => {
+            renderHistory();
+        }
+    </script>
+</body>
+
+</html>
